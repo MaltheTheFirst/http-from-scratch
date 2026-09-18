@@ -57,7 +57,13 @@ function handleRequest(
                     // JSON.parse converts the complete JSON text into a JavaScript value and throws if the JSON is malformed.
                     try {
                         const parsedBody = JSON.parse(body);
-                        res.end(parsedBody.message);
+                            if (typeof parsedBody.message !== "string") {
+                                res.statusCode = 400;
+                                res.end("Invalid request body: 'message' must be a string");
+                            } else {
+                                console.log(parsedBody.message);
+                                res.end(parsedBody.message);
+                            }
                     } catch {
                         res.statusCode = 400;
                         res.end("Invalid JSON");
