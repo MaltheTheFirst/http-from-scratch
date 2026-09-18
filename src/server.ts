@@ -26,26 +26,35 @@ function handleRequest(
     else if (req.method === "POST" && url.pathname === "/echo") {
         const contentType = req.headers["content-type"];
 
-        if (contentType !== "application/json") {
+        if (contentType === undefined) {
             res.statusCode = 415;
-            res.end("Wrong content type");
+            res.end("Missing content type");
         }
         else {
-            let body = "";
+            const parts = contentType.split(";");
+            const mediaType = parts[0];
 
-            req.on("data", (chunk) => {
-                body += chunk.toString();
-            });
+            if (mediaType !== "application/json") {
+                res.statusCode = 415;
+                res.end("Unsupported media type");
+                return;
+            } else {
+                let body = "";
 
-            req.on("end", () => {
-                try {
-                    const parsedBody = JSON.parse(body);
-                    res.end(parsedBody.message);
-                } catch {
-                    res.statusCode = 400;
-                    res.end("Invalid JSON");
-                }
-            });
+                req.on("data", (chunk) => {
+                    body += chunk.toString();
+                });
+
+                req.on("end", () => {
+                    try {
+                        const parsedBody = JSON.parse(body);
+                        res.end(parsedBody.message);
+                    } catch {
+                        res.statusCode = 400;
+                        res.end("Invalid JSON");
+                    }
+                });
+            }
         }
     }
     else {
