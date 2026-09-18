@@ -4,6 +4,12 @@ function handleRequest(
     req: http.IncomingMessage, 
     res: http.ServerResponse
 ) {
+    const url = new URL(req.url!, "http://localhost:3000");
+
+    console.log("URL: ", url);
+    console.log("Pathname: ", url.pathname);
+    console.log("Name: ", url.searchParams);
+
     if (req.method === "GET" && req.url === "/") {
         res.end("Home");
     }
