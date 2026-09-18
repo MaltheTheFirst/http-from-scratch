@@ -1,6 +1,21 @@
 
 import http from "node:http";
 
+function matchRoute (pattern: string, pathname: string) {
+    const patternParts = pattern.split("/");
+    const pathParts = pathname.split("/");
+
+    if (patternParts.length !== pathParts.length) {
+        return null;
+    }
+    for (let i = 0; i < patternParts.length; i++) {
+        const patternPart = patternParts[i];
+        const pathPart = pathParts[i];
+
+        console.log(patternPart, pathPart);
+    }
+}
+
 function handleRequest(
     req: http.IncomingMessage, 
     res: http.ServerResponse
@@ -55,7 +70,7 @@ function handleRequest(
 
                     // JSON.parse converts the complete JSON text into a JavaScript value and throws if the JSON is malformed.
                     try {
-                        const parsedBody = JSON.parse(body);
+                    const parsedBody = JSON.parse(body);
 
                         if (typeof parsedBody !== "object" || parsedBody === null || Array.isArray(parsedBody)) {
                             res.statusCode = 400;
