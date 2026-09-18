@@ -1,6 +1,9 @@
 import http from "node:http";
 
-function handleRequest(req, res) {
+function handleRequest(
+    req: http.IncomingMessage, 
+    res: http.ServerResponse
+) {
     res.write("Hello ");
     res.end("World!");
 }
