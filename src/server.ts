@@ -24,25 +24,33 @@ function handleRequest(
         }
     }
     else if (req.method === "POST" && url.pathname === "/echo") {
-        let body = "";
+        const contentType = req.headers["content-type"];
 
-        req.on("data", (chunk) => {
-            body += chunk.toString();
-        });
+        if (contentType !== "application/json") {
+            res.statusCode = 415;
+            res.end("Wrong content type");
+        }
+        else {
+            let body = "";
 
-        req.on("end", () => {
-            try {
-                const parsedBody = JSON.parse(body);
-                res.end(parsedBody.message);
-            } catch {
-                res.statusCode = 400;
-                res.end("Invalid JSON");
-            }
-        });
+            req.on("data", (chunk) => {
+                body += chunk.toString();
+            });
+
+            req.on("end", () => {
+                try {
+                    const parsedBody = JSON.parse(body);
+                    res.end(parsedBody.message);
+                } catch {
+                    res.statusCode = 400;
+                    res.end("Invalid JSON");
+                }
+            });
+        }
     }
     else {
         res.statusCode = 404;
-        res.end("Not found");
+        res.end("Not Found");
     }
 }
 
