@@ -1,0 +1,24 @@
+{
+  "name": "http-from-scratch",
+  "version": "1.0.0",
+  "description": "Exploring HTTP and web fundamentals by building a Node.js server from first principles, without web frameworks.",
+  "homepage": "https://github.com/MaltheTheFirst/http-from-scratch#readme",
+  "bugs": {
+    "url": "https://github.com/MaltheTheFirst/http-from-scratch/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaltheTheFirst/http-from-scratch.git"
+  },
+  "license": "MIT",
+  "author": "MaltheTheFirst",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "typescript": "^7.0.2"
+  }
+}
