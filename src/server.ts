@@ -14,6 +14,8 @@ function handleRequest(
         res.end("Home");
     }
     else if (req.method === "GET" && url.pathname === "/hello") {
+        const name = url.searchParams.get("name");
+        
         res.write("Hello ");
         res.end("World");
     }
