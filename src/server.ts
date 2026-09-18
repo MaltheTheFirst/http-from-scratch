@@ -16,8 +16,12 @@ function handleRequest(
     else if (req.method === "GET" && url.pathname === "/hello") {
         const name = url.searchParams.get("name");
         
-        res.write("Hello ");
-        res.end("World");
+        if (name !== null) {
+            res.end(`Hello ${name}!`);
+        }
+        else {
+            res.end("Hello, World!");
+        }
     }
     else {
         res.statusCode = 404;
