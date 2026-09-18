@@ -8,9 +8,8 @@ function handleRequest(
     // Parse the incoming request target into its pathname and query parameters.
     const url = new URL(req.url!, "http://localhost:3000");
 
-    console.log("URL: ", url);
-    console.log("Pathname: ", url.pathname);
-    console.log("Name: ", url.searchParams);
+    const pathParts = url.pathname.split("/");
+    console.log("Path parts: ", pathParts);
 
     // Manually route requests based on HTTP method and pathname.
     if (req.method === "GET" && url.pathname === "/") {
@@ -82,6 +81,12 @@ function handleRequest(
             }
         }
     }
+
+    else if (req.method === "GET" && pathParts[1] === "users" && pathParts.length === 3 && pathParts[2] !== ""){
+        const userId = pathParts[2];
+        res.end(`User ID: ${userId}`);
+    }
+
     else {
         // No method/path combination above matched the request.
         res.statusCode = 404;
