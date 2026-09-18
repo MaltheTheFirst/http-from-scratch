@@ -31,12 +31,13 @@ function handleRequest(
         });
 
         req.on("end", () => {
-            const parsedBody = JSON.parse(body);
-
-            console.log(parsedBody);
-            console.log(parsedBody.message);
-
-            res.end(parsedBody.message);
+            try {
+                const parsedBody = JSON.parse(body);
+                res.end(parsedBody.message);
+            } catch {
+                res.statusCode = 400;
+                res.end("Invalid JSON");
+            }
         });
     }
     else {
