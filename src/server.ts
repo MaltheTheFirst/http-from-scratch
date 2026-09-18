@@ -12,9 +12,14 @@ function matchRoute (pattern: string, pathname: string) {
         const patternPart = patternParts[i];
         const pathPart = pathParts[i];
 
-        console.log(patternPart, pathPart);
+        if (!patternPart.startsWith(":") && patternPart !== pathPart) {
+            return null;
+        }
+
     }
+    return {};
 }
+
 
 function handleRequest(
     req: http.IncomingMessage, 
