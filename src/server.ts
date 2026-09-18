@@ -10,10 +10,10 @@ function handleRequest(
     console.log("Pathname: ", url.pathname);
     console.log("Name: ", url.searchParams);
 
-    if (req.method === "GET" && req.url === "/") {
+    if (req.method === "GET" && url.pathname === "/") {
         res.end("Home");
     }
-    else if (req.method === "GET" && req.url === "/hello") {
+    else if (req.method === "GET" && url.pathname === "/hello") {
         res.write("Hello ");
         res.end("World");
     }
