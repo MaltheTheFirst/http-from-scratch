@@ -23,6 +23,22 @@ function handleRequest(
             res.end("Hello, World!");
         }
     }
+    else if (req.method === "POST" && url.pathname === "/echo") {
+        let body = "";
+
+        req.on("data", (chunk) => {
+            body += chunk.toString();
+        });
+
+        req.on("end", () => {
+            const parsedBody = JSON.parse(body);
+
+            console.log(parsedBody);
+            console.log(parsedBody.message);
+
+            res.end(parsedBody.message);
+        });
+    }
     else {
         res.statusCode = 404;
         res.end("Not found");
