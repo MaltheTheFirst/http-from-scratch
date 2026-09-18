@@ -62,7 +62,11 @@ function handleRequest(
                             res.statusCode = 400;
                             res.end("Invalid request body: expected an object");
                         } else {
-                            if (typeof parsedBody.message !== "string") {
+                            if (!Object.hasOwn(parsedBody, "message")) {
+                                res.statusCode = 400;
+                                res.end("Invalid request body: 'message' property is required");
+                            }
+                            else if (typeof parsedBody.message !== "string") {
                                 res.statusCode = 400;
                                 res.end("Invalid request body: 'message' must be a string");
                             } else {
