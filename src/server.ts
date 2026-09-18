@@ -87,6 +87,12 @@ function handleRequest(
         res.end(`User ID: ${userId}`);
     }
 
+    else if (req.method === "GET" && pathParts[1] === "users" && pathParts[3] === "posts" && pathParts.length === 5 && pathParts[2] !== "" && pathParts[4] !== "") {
+        const userId = pathParts[2];
+        const postId = pathParts[4];
+        res.end(`User: ${userId}, Post: ${postId}`);
+    }
+
     else {
         // No method/path combination above matched the request.
         res.statusCode = 404;
