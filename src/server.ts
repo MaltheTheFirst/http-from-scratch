@@ -32,7 +32,8 @@ const routes = [
     { method: "GET", pattern: "/users/:userId", handler: handleUser },
     { method: "GET", pattern: "/users/:userId/posts/:postId", handler: handleUserPost },
     { method: "GET", pattern: "/hello", handler: handleHello },
-    { method: "GET", pattern: "/", handler: handleHome }
+    { method: "GET", pattern: "/", handler: handleHome },
+    { method: "POST", pattern: "/echo", handler: handleEcho }
 ];
 
 function handleUser(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>, url: URL) {
@@ -60,70 +61,63 @@ function handleHome(req: http.IncomingMessage, res: http.ServerResponse, params:
     res.end("Home");
 }
 
+function handleEcho(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>, url: URL) {
+    // Validate the representation before consuming the request body.
+    const contentType = req.headers["content-type"];
+
+    if (contentType === undefined) {
+        res.statusCode = 415;
+        res.end("Missing content type");
+        return;
+    } else {
+        const parts = contentType.split(";");
+        const mediaType = parts[0];
+
+        if (mediaType !== "application/json") {
+            res.statusCode = 415;
+            res.end("Unsupported media type");
+            return;
+        } else {
+            let body = "";
+
+            req.on("data", (chunk) => {
+                body += chunk.toString();
+            });
+
+            req.on("end", () => {
+                try {
+                    const parsedBody = JSON.parse(body);
+                    if (typeof parsedBody !== "object" || parsedBody === null || Array.isArray(parsedBody)) {
+                        res.statusCode = 400;
+                        res.end("Invalid request body: expected an object");
+                    } else {
+
+                        if (!Object.hasOwn(parsedBody, "message")) {
+                            res.statusCode = 400;
+                            res.end("Invalid request body: 'message' property is required");
+                        }
+                        else if (typeof parsedBody.message !== "string") {
+                            res.statusCode = 400;
+                            res.end("Invalid request body: 'message' must be a string");
+                        } else {
+                            res.end(parsedBody.message);
+                        }
+                    }
+                } catch {
+                    res.statusCode = 400;
+                    res.end("Invalid JSON");
+                }
+            });           
+        }
+    }
+}
+
 function handleRequest(
     req: http.IncomingMessage, 
     res: http.ServerResponse
 ) {
     // Parse the incoming request target into its pathname and query parameters.
     const url = new URL(req.url!, "http://localhost:3000");
-
-    if (req.method === "POST" && url.pathname === "/echo") {
-        // Validate the representation before consuming the request body.
-        const contentType = req.headers["content-type"];
-
-        if (contentType === undefined) {
-            res.statusCode = 415;
-            res.end("Missing content type");
-            return;
-        }
-        else {
-            // Content-Type may contain parameters, e.g. "application/json; charset=utf-8".
-            const parts = contentType.split(";");
-            const mediaType = parts[0];
-
-            if (mediaType !== "application/json") {
-                res.statusCode = 415;
-                res.end("Unsupported media type");
-                return;
-            } else {
-                let body = "";
-
-                // IncomingMessage is a readable stream. Body data may arrive in multiple chunks, so accumulate them until the stream ends.
-                req.on("data", (chunk) => {
-                    body += chunk.toString();
-                });
-
-                req.on("end", () => {
-
-                    // JSON.parse converts the complete JSON text into a JavaScript value and throws if the JSON is malformed.
-                    try {
-                    const parsedBody = JSON.parse(body);
-
-                        if (typeof parsedBody !== "object" || parsedBody === null || Array.isArray(parsedBody)) {
-                            res.statusCode = 400;
-                            res.end("Invalid request body: expected an object");
-                        } else {
-                            if (!Object.hasOwn(parsedBody, "message")) {
-                                res.statusCode = 400;
-                                res.end("Invalid request body: 'message' property is required");
-                            }
-                            else if (typeof parsedBody.message !== "string") {
-                                res.statusCode = 400;
-                                res.end("Invalid request body: 'message' must be a string");
-                            } else {
-                                console.log(parsedBody.message);
-                                res.end(parsedBody.message);
-                            }
-                        }
-                    } catch {
-                        res.statusCode = 400;
-                        res.end("Invalid JSON");
-                    }
-                });
-                return;
-            }
-        }
-    } 
 
     for (let i = 0; i < routes.length; i++) {
         const route = routes[i];
