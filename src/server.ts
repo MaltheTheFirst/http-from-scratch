@@ -14,8 +14,8 @@ function matchRoute (pattern: string, pathname: string) {
         const pathPart = pathParts[i];
 
         if (!patternPart.startsWith(":") && patternPart === pathPart) {
-            
-        }
+
+        } 
         else if (patternPart.startsWith(":")) {
             const paramParts = patternPart.split(":");
             const paramName = paramParts[1];
@@ -28,37 +28,54 @@ function matchRoute (pattern: string, pathname: string) {
     return params;
 }
 
+const routes = [
+    { method: "GET", pattern: "/users/:userId", handler: handleUser },
+    { method: "GET", pattern: "/users/:userId/posts/:postId", handler: handleUserPost }
+]
+
+function handleUser(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>) {
+    const userId = params.userId;
+    res.end(`User ID: ${userId}`);
+}
+
+function handleUserPost(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>) {
+    const userId = params.userId;
+    const postId = params.postId;
+    res.end(`User ID: ${userId}, Post ID: ${postId}`);
+}
+
 function handleRequest(
     req: http.IncomingMessage, 
     res: http.ServerResponse
 ) {
     // Parse the incoming request target into its pathname and query parameters.
     const url = new URL(req.url!, "http://localhost:3000");
-    const userMatch = matchRoute("/users/:userId", url.pathname);
-    const userPostMatch = matchRoute("/users/:userId/posts/:postId", url.pathname);
 
     // Manually route requests based on HTTP method and pathname.
     if (req.method === "GET" && url.pathname === "/") {
         res.end("Home");
+        return;
     }
-    else if (req.method === "GET" && url.pathname === "/hello") {
+    if (req.method === "GET" && url.pathname === "/hello") {
         const name = url.searchParams.get("name");
         
         if (name !== null) {
             res.end(`Hello ${name}!`);
+            return;
         }
         else {
             res.end("Hello, World!");
+            return;
         }
     }
-    
-    else if (req.method === "POST" && url.pathname === "/echo") {
+    if (req.method === "POST" && url.pathname === "/echo") {
         // Validate the representation before consuming the request body.
         const contentType = req.headers["content-type"];
 
         if (contentType === undefined) {
             res.statusCode = 415;
             res.end("Missing content type");
+            return;
         }
         else {
             // Content-Type may contain parameters, e.g. "application/json; charset=utf-8".
@@ -104,26 +121,28 @@ function handleRequest(
                         res.end("Invalid JSON");
                     }
                 });
+                return;
             }
         }
+    } 
+
+    for (let i = 0; i < routes.length; i++) {
+        const route = routes[i];
+        if (req.method !== route.method) {
+            continue;
+        }
+
+        const match = matchRoute(route.pattern, url.pathname);
+        if (match === null) {
+            continue;
+        }
+        route.handler(req, res, match);
+        return;
     }
 
-    else if (req.method === "GET" && userMatch !== null){
-        const userId = userMatch.userId;
-        res.end(`User ID: ${userId}`);
-    }
-
-    else if (req.method === "GET" && userPostMatch !== null) {
-        const userId = userPostMatch.userId;
-        const postId = userPostMatch.postId;
-        res.end(`User: ${userId}, Post: ${postId}`);
-    }
-
-    else {
-        // No method/path combination above matched the request.
-        res.statusCode = 404;
-        res.end("Not Found");
-    }
+    // No method/path combination above matched the request.
+    res.statusCode = 404;
+    res.end("Not Found");
 }
 
 const server = http.createServer(handleRequest);
