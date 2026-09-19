@@ -30,18 +30,34 @@ function matchRoute (pattern: string, pathname: string) {
 
 const routes = [
     { method: "GET", pattern: "/users/:userId", handler: handleUser },
-    { method: "GET", pattern: "/users/:userId/posts/:postId", handler: handleUserPost }
-]
+    { method: "GET", pattern: "/users/:userId/posts/:postId", handler: handleUserPost },
+    { method: "GET", pattern: "/hello", handler: handleHello },
+    { method: "GET", pattern: "/", handler: handleHome }
+];
 
-function handleUser(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>) {
+function handleUser(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>, url: URL) {
     const userId = params.userId;
     res.end(`User ID: ${userId}`);
 }
 
-function handleUserPost(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>) {
+function handleUserPost(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>, url: URL) {
     const userId = params.userId;
     const postId = params.postId;
     res.end(`User ID: ${userId}, Post ID: ${postId}`);
+}
+
+function handleHello (req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>, url: URL) {
+    const name = url.searchParams.get("name");
+    if (name !== null && name.length >= 1) {
+        res.end(`Hello ${name}!`);
+    }
+    else {
+        res.end("Hello, World!");
+    }
+}
+
+function handleHome(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>, url: URL) {
+    res.end("Home");
 }
 
 function handleRequest(
@@ -51,23 +67,6 @@ function handleRequest(
     // Parse the incoming request target into its pathname and query parameters.
     const url = new URL(req.url!, "http://localhost:3000");
 
-    // Manually route requests based on HTTP method and pathname.
-    if (req.method === "GET" && url.pathname === "/") {
-        res.end("Home");
-        return;
-    }
-    if (req.method === "GET" && url.pathname === "/hello") {
-        const name = url.searchParams.get("name");
-        
-        if (name !== null) {
-            res.end(`Hello ${name}!`);
-            return;
-        }
-        else {
-            res.end("Hello, World!");
-            return;
-        }
-    }
     if (req.method === "POST" && url.pathname === "/echo") {
         // Validate the representation before consuming the request body.
         const contentType = req.headers["content-type"];
@@ -136,7 +135,7 @@ function handleRequest(
         if (match === null) {
             continue;
         }
-        route.handler(req, res, match);
+        route.handler(req, res, match, url);
         return;
     }
 
