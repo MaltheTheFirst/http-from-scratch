@@ -30,12 +30,25 @@ function matchRoute (pattern: string, pathname: string) {
     return params;
 }
 
-const routes = [
+type RouteHandler = (
+    req: http.IncomingMessage,
+    res: http.ServerResponse,
+    params: Record<string, string>,
+    url: URL
+) => void;
+
+type Route = {
+    method: string,
+    pattern: string,
+    handler: RouteHandler
+};
+
+const routes: Route[] = [
     { method: "GET", pattern: "/users/:userId", handler: handleUser },
     { method: "GET", pattern: "/users/:userId/posts/:postId", handler: handleUserPost },
     { method: "GET", pattern: "/hello", handler: handleHello },
     { method: "GET", pattern: "/", handler: handleHome },
-    { method: "POST", pattern: "/echo", handler: handleEcho }
+    { method: "POST", pattern: "/echo", handler: handleEcho },
 ];
 
 function handleUser(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>, url: URL) {
