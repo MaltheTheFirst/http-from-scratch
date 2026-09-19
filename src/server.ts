@@ -71,47 +71,46 @@ function handleEcho(req: http.IncomingMessage, res: http.ServerResponse, params:
         res.statusCode = 415;
         res.end("Missing content type");
         return;
-    } else {
-        const parts = contentType.split(";");
-        const mediaType = parts[0];
-
-        if (mediaType !== "application/json") {
-            res.statusCode = 415;
-            res.end("Unsupported media type");
-            return;
-        } else {
-            let body = "";
-
-            req.on("data", (chunk) => {
-                body += chunk.toString();
-            });
-
-            req.on("end", () => {
-                try {
-                    const parsedBody = JSON.parse(body);
-                    if (typeof parsedBody !== "object" || parsedBody === null || Array.isArray(parsedBody)) {
-                        res.statusCode = 400;
-                        res.end("Invalid request body: expected an object");
-                    } else {
-
-                        if (!Object.hasOwn(parsedBody, "message")) {
-                            res.statusCode = 400;
-                            res.end("Invalid request body: 'message' property is required");
-                        }
-                        else if (typeof parsedBody.message !== "string") {
-                            res.statusCode = 400;
-                            res.end("Invalid request body: 'message' must be a string");
-                        } else {
-                            res.end(parsedBody.message);
-                        }
-                    }
-                } catch {
-                    res.statusCode = 400;
-                    res.end("Invalid JSON");
-                }
-            });           
-        }
     }
+    const parts = contentType.split(";");
+    const mediaType = parts[0];
+
+    if (mediaType !== "application/json") {
+        res.statusCode = 415;
+        res.end("Unsupported media type");
+        return;
+    } 
+    let body = "";
+
+    req.on("data", (chunk) => {
+        body += chunk.toString();
+    });
+
+    req.on("end", () => {
+        try {
+            const parsedBody = JSON.parse(body);
+            if (typeof parsedBody !== "object" || parsedBody === null || Array.isArray(parsedBody)) {
+                res.statusCode = 400;
+                res.end("Invalid request body: expected an object");
+                return;
+            }
+
+            if (!Object.hasOwn(parsedBody, "message")) {
+                res.statusCode = 400;
+                res.end("Invalid request body: 'message' property is required");
+                return;
+            }
+            if (typeof parsedBody.message !== "string") {
+                res.statusCode = 400;
+                res.end("Invalid request body: 'message' must be a string");
+                return;
+            }
+            res.end(parsedBody.message);
+        } catch {
+            res.statusCode = 400;
+            res.end("Invalid JSON");
+        }
+    });
 }
 
 function handleRequest(
