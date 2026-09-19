@@ -34,9 +34,8 @@ function handleRequest(
 ) {
     // Parse the incoming request target into its pathname and query parameters.
     const url = new URL(req.url!, "http://localhost:3000");
-
-    const pathParts = url.pathname.split("/");
-    console.log("Path parts: ", pathParts);
+    const userMatch = matchRoute("/users/:userId", url.pathname);
+    const userPostMatch = matchRoute("/users/:userId/posts/:postId", url.pathname);
 
     // Manually route requests based on HTTP method and pathname.
     if (req.method === "GET" && url.pathname === "/") {
@@ -109,14 +108,14 @@ function handleRequest(
         }
     }
 
-    else if (req.method === "GET" && pathParts[1] === "users" && pathParts.length === 3 && pathParts[2] !== ""){
-        const userId = pathParts[2];
+    else if (req.method === "GET" && userMatch !== null){
+        const userId = userMatch.userId;
         res.end(`User ID: ${userId}`);
     }
 
-    else if (req.method === "GET" && pathParts[1] === "users" && pathParts[3] === "posts" && pathParts.length === 5 && pathParts[2] !== "" && pathParts[4] !== "") {
-        const userId = pathParts[2];
-        const postId = pathParts[4];
+    else if (req.method === "GET" && userPostMatch !== null) {
+        const userId = userPostMatch.userId;
+        const postId = userPostMatch.postId;
         res.end(`User: ${userId}, Post: ${postId}`);
     }
 
