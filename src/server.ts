@@ -4,6 +4,7 @@ import http from "node:http";
 function matchRoute (pattern: string, pathname: string) {
     const patternParts = pattern.split("/");
     const pathParts = pathname.split("/");
+    const params: Record<string, string> = {};
 
     if (patternParts.length !== pathParts.length) {
         return null;
@@ -12,14 +13,20 @@ function matchRoute (pattern: string, pathname: string) {
         const patternPart = patternParts[i];
         const pathPart = pathParts[i];
 
-        if (!patternPart.startsWith(":") && patternPart !== pathPart) {
+        if (!patternPart.startsWith(":") && patternPart === pathPart) {
+            
+        }
+        else if (patternPart.startsWith(":")) {
+            const paramParts = patternPart.split(":");
+            const paramName = paramParts[1];
+            params[paramName] = pathPart;
+        }
+        else {
             return null;
         }
-
     }
-    return {};
+    return params;
 }
-
 
 function handleRequest(
     req: http.IncomingMessage, 
