@@ -13,15 +13,17 @@ function matchRoute (pattern: string, pathname: string) {
         const patternPart = patternParts[i];
         const pathPart = pathParts[i];
 
-        if (!patternPart.startsWith(":") && patternPart === pathPart) {
+        if (patternPart.startsWith(":")) {
+            const paramName = patternPart.slice(1);
 
-        } 
-        else if (patternPart.startsWith(":")) {
-            const paramParts = patternPart.split(":");
-            const paramName = paramParts[1];
+            if (pathPart.length === 0 || paramName.length === 0) {
+                return null;
+            }
+
             params[paramName] = pathPart;
-        }
-        else {
+            continue;
+        } 
+        if (patternPart !== pathPart) {
             return null;
         }
     }
