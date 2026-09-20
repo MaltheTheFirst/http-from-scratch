@@ -96,7 +96,9 @@ function handleHome(req: http.IncomingMessage, res: http.ServerResponse, params:
     res.end("Home");
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+function isRecord(
+    value: unknown
+): value is Record<string, unknown> {
     return (
         typeof value === "object" &&
         value !== null &&
@@ -133,6 +135,7 @@ async function handleEcho(req: http.IncomingMessage, res: http.ServerResponse, p
 
     try {
         const parsedBody: unknown = JSON.parse(body);
+
         if (!isRecord(parsedBody)) {
             res.statusCode = 400;
             res.end("Invalid request body: expected an object");
@@ -156,12 +159,16 @@ async function handleEcho(req: http.IncomingMessage, res: http.ServerResponse, p
     }
 }
 
-function handleRequest(
+async function handleRequest(
     req: http.IncomingMessage, 
     res: http.ServerResponse
 ) {
     // Parse the incoming request target into its pathname and query parameters.
     const url = new URL(req.url!, "http://localhost:3000");
+
+    if (url.searchParams.get("fail") === "true") {
+        throw new Error("Deliberate async failure");
+    }
 
     for (let i = 0; i < routes.length; i++) {
         const route = routes[i];
@@ -173,8 +180,17 @@ function handleRequest(
         if (match === null) {
             continue;
         }
-        route.handler(req, res, match, url);
+
+        try {
+        await route.handler(req, res, match, url);
         return;
+        } catch (error) {
+            console.error("Route handler failed", error);
+
+            res.statusCode = 500;
+            res.end("Internal server error");
+            return;
+        }
     }
 
     // No method/path combination above matched the request.
@@ -182,6 +198,18 @@ function handleRequest(
     res.end("Not Found");
 }
 
-const server = http.createServer(handleRequest);
+const server = http.createServer((req, res) => {
+    handleRequest(req, res).catch((error) => {
+        console.error("Unhandled request error:", error);
+
+        if (!res.headersSent) {
+            res.statusCode = 500;
+            res.end("Internal Server Error");
+            return;
+        }
+
+        res.destroy(error);
+    });
+});
 
 server.listen(3000);
