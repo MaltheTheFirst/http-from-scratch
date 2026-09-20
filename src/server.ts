@@ -1,5 +1,6 @@
 
 import http from "node:http";
+import { BodyMixin } from "undici-types";
 
 function matchRoute (pattern: string, pathname: string) {
     const patternParts = pattern.split("/");
@@ -76,6 +77,14 @@ function handleHome(req: http.IncomingMessage, res: http.ServerResponse, params:
     res.end("Home");
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return (
+        typeof value === "object" &&
+        value !== null &&
+        !Array.isArray(value)
+    );
+}
+
 function handleEcho(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>, url: URL) {
     // Validate the representation before consuming the request body.
     const contentType = req.headers["content-type"];
@@ -101,8 +110,8 @@ function handleEcho(req: http.IncomingMessage, res: http.ServerResponse, params:
 
     req.on("end", () => {
         try {
-            const parsedBody = JSON.parse(body);
-            if (typeof parsedBody !== "object" || parsedBody === null || Array.isArray(parsedBody)) {
+            const parsedBody: unknown = JSON.parse(body);
+            if (!isRecord(parsedBody)) {
                 res.statusCode = 400;
                 res.end("Invalid request body: expected an object");
                 return;
