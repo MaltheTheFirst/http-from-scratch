@@ -35,7 +35,7 @@ type RouteHandler = (
     res: http.ServerResponse,
     params: Record<string, string>,
     url: URL
-) => void;
+) => void | Promise<void>;
 
 type Route = {
     method: string,
@@ -165,10 +165,6 @@ async function handleRequest(
 ) {
     // Parse the incoming request target into its pathname and query parameters.
     const url = new URL(req.url!, "http://localhost:3000");
-
-    if (url.searchParams.get("fail") === "true") {
-        throw new Error("Deliberate async failure");
-    }
 
     for (let i = 0; i < routes.length; i++) {
         const route = routes[i];
