@@ -1,6 +1,5 @@
 
 import http from "node:http";
-import { BodyMixin } from "undici-types";
 
 function matchRoute (pattern: string, pathname: string) {
     const patternParts = pattern.split("/");
