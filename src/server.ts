@@ -43,6 +43,26 @@ type Route = {
     handler: RouteHandler
 };
 
+function readBody(
+    req: http.IncomingMessage
+): Promise<string> {
+    return new Promise((resolve, reject) => {
+        let body = "";
+
+        req.on("data", (chunk) => {
+            body += chunk.toString();
+        });
+
+        req.on("end", () => {
+            resolve(body);
+        });
+
+        req.on("error", (error) => {
+            reject(error);
+        });
+    });
+}
+
 const routes: Route[] = [
     { method: "GET", pattern: "/users/:userId", handler: handleUser },
     { method: "GET", pattern: "/users/:userId/posts/:postId", handler: handleUserPost },
@@ -84,7 +104,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
     );
 }
 
-function handleEcho(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>, url: URL) {
+async function handleEcho(req: http.IncomingMessage, res: http.ServerResponse, params: Record<string, string>, url: URL) {
     // Validate the representation before consuming the request body.
     const contentType = req.headers["content-type"];
 
@@ -101,37 +121,39 @@ function handleEcho(req: http.IncomingMessage, res: http.ServerResponse, params:
         res.end("Unsupported media type");
         return;
     } 
-    let body = "";
+    let body: string;
 
-    req.on("data", (chunk) => {
-        body += chunk.toString();
-    });
+    try {
+        body = await readBody(req);
+    } catch {
+        res.statusCode = 400;
+        res.end("Failed to read request body");
+        return;
+    }
 
-    req.on("end", () => {
-        try {
-            const parsedBody: unknown = JSON.parse(body);
-            if (!isRecord(parsedBody)) {
-                res.statusCode = 400;
-                res.end("Invalid request body: expected an object");
-                return;
-            }
-
-            if (!Object.hasOwn(parsedBody, "message")) {
-                res.statusCode = 400;
-                res.end("Invalid request body: 'message' property is required");
-                return;
-            }
-            if (typeof parsedBody.message !== "string") {
-                res.statusCode = 400;
-                res.end("Invalid request body: 'message' must be a string");
-                return;
-            }
-            res.end(parsedBody.message);
-        } catch {
+    try {
+        const parsedBody: unknown = JSON.parse(body);
+        if (!isRecord(parsedBody)) {
             res.statusCode = 400;
-            res.end("Invalid JSON");
+            res.end("Invalid request body: expected an object");
+            return;
         }
-    });
+
+        if (!Object.hasOwn(parsedBody, "message")) {
+            res.statusCode = 400;
+            res.end("Invalid request body: 'message' property is required");
+            return;
+        }
+        if (typeof parsedBody.message !== "string") {
+            res.statusCode = 400;
+            res.end("Invalid request body: 'message' must be a string");
+            return;
+        }
+        res.end(parsedBody.message);
+    } catch {
+        res.statusCode = 400;
+        res.end("Invalid JSON");
+    }
 }
 
 function handleRequest(
