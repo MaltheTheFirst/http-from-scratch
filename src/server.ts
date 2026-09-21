@@ -165,15 +165,19 @@ async function handleRequest(
 ) {
     // Parse the incoming request target into its pathname and query parameters.
     const url = new URL(req.url!, "http://localhost:3000");
+    const allowedMethods: string[] = [];
 
     for (let i = 0; i < routes.length; i++) {
         const route = routes[i];
-        if (req.method !== route.method) {
-            continue;
-        }
 
         const match = matchRoute(route.pattern, url.pathname);
         if (match === null) {
+            continue;
+        }
+
+        allowedMethods.push(route.method);
+
+        if (req.method !== route.method) {
             continue;
         }
 
@@ -189,9 +193,16 @@ async function handleRequest(
         }
     }
 
+    if (allowedMethods.length === 0) {
     // No method/path combination above matched the request.
     res.statusCode = 404;
     res.end("Not Found");
+    return;
+    }
+
+    res.statusCode = 405;
+    res.setHeader("Allow", allowedMethods.join(", "));
+    res.end("Method Not Allowed");
 }
 
 const server = http.createServer((req, res) => {
