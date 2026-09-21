@@ -29,7 +29,7 @@ function matchRoute (pattern: string, pathname: string) {
     return params;
 }
 
-type RouteHandler = (
+export type RouteHandler = (
     req: http.IncomingMessage,
     res: http.ServerResponse,
     params: Record<string, string>,
