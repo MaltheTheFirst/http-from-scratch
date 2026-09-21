@@ -159,6 +159,17 @@ async function handleEcho(req: http.IncomingMessage, res: http.ServerResponse, p
     }
 }
 
+function logger(
+    req: http.IncomingMessage,
+    res: http.ServerResponse,
+    next: () => void
+) {
+    console.log(req.method, req.url);
+    next();
+}
+
+
+
 async function handleRequest(
     req: http.IncomingMessage, 
     res: http.ServerResponse
@@ -220,16 +231,18 @@ async function handleRequest(
 }
 
 const server = http.createServer((req, res) => {
-    handleRequest(req, res).catch((error) => {
-        console.error("Unhandled request error:", error);
+    logger(req, res, () => {
+        handleRequest(req, res).catch((error) => {
+            console.error("Unhandled request error:", error);
 
-        if (!res.headersSent) {
-            res.statusCode = 500;
-            res.end("Internal Server Error");
-            return;
-        }
+            if (!res.headersSent) {
+                res.statusCode = 500;
+                res.end("Internal Server Error");
+                return;
+            }
 
-        res.destroy(error);
+            res.destroy(error);
+        });
     });
 });
 
