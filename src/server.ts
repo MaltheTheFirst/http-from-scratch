@@ -159,16 +159,51 @@ async function handleEcho(req: http.IncomingMessage, res: http.ServerResponse, p
     }
 }
 
-function logger(
+type MiddleWare = (
     req: http.IncomingMessage,
     res: http.ServerResponse,
-    next: () => void
-) {
+    next: () => Promise<void>
+) => Promise<void>;
+
+const logger: MiddleWare = async (req, res, next) => {
     console.log(req.method, req.url);
-    next();
+    await next();
+};
+
+const timer: MiddleWare = async (req, res, next) => {
+    const start = performance.now();
+
+    await next();
+
+    const duration = performance.now() - start;
+    console.log(duration.toFixed(2));
+};
+
+const middlewares: MiddleWare[] = [
+    logger,
+    timer
+];
+
+async function runMiddleware(
+    req: http.IncomingMessage,
+    res: http.ServerResponse
+) {
+    let index = 0;
+
+    async function next(): Promise<void> {
+        const middleware = middlewares[index];
+        index++;
+
+        if (middleware === undefined) {
+            await handleRequest(req, res);
+            return;
+        }
+
+        await middleware(req, res, next);
+    }
+
+    await next();
 }
-
-
 
 async function handleRequest(
     req: http.IncomingMessage, 
@@ -231,8 +266,8 @@ async function handleRequest(
 }
 
 const server = http.createServer((req, res) => {
-    logger(req, res, () => {
-        handleRequest(req, res).catch((error) => {
+    runMiddleware(req, res).catch((error) => {
+        return handleRequest(req, res).catch((error) => {
             console.error("Unhandled request error:", error);
 
             if (!res.headersSent) {
