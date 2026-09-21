@@ -1,5 +1,5 @@
-
 import http from "node:http";
+import { readBody } from "./http/read-body.js"
 
 function matchRoute (pattern: string, pathname: string) {
     const patternParts = pattern.split("/");
@@ -42,26 +42,6 @@ type Route = {
     pattern: string,
     handler: RouteHandler
 };
-
-function readBody(
-    req: http.IncomingMessage
-): Promise<string> {
-    return new Promise((resolve, reject) => {
-        let body = "";
-
-        req.on("data", (chunk) => {
-            body += chunk.toString();
-        });
-
-        req.on("end", () => {
-            resolve(body);
-        });
-
-        req.on("error", (error) => {
-            reject(error);
-        });
-    });
-}
 
 const routes: Route[] = [
     { method: "GET", pattern: "/users/:userId", handler: handleUser },
