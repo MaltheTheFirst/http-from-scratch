@@ -175,9 +175,15 @@ async function handleRequest(
             continue;
         }
 
+        if (route.method === "GET") {
+            allowedMethods.push("GET", "HEAD");
+        } else {
         allowedMethods.push(route.method);
+        }
 
-        if (req.method !== route.method) {
+        if (req.method !== route.method &&
+            !(req.method === "HEAD" && route.method === "GET")
+        ) {
             continue;
         }
 
