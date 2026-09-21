@@ -199,6 +199,14 @@ async function handleRequest(
         }
     }
 
+    if (req.method === "OPTIONS" && allowedMethods.length !== 0) {
+        allowedMethods.push("OPTIONS");
+        res.setHeader("Allow", allowedMethods.join(", "));
+        res.statusCode = 204;
+        res.end();
+        return;
+    }
+
     if (allowedMethods.length === 0) {
     // No method/path combination above matched the request.
     res.statusCode = 404;
