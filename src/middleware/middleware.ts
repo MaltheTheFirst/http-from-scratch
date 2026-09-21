@@ -30,7 +30,7 @@ export async function runMiddleware(
     res: http.ServerResponse,
     handler: (
         req: http.IncomingMessage,
-        res: http.ServerResponse
+        res: http.ServerResponse,
     ) => Promise<void>
 ) {
     let index = 0;
