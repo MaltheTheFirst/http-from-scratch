@@ -20,3 +20,7 @@ export function createSession(username: string): string {
 export function getSession(sessionId: string): Session | undefined {
     return sessions.get(sessionId);
 }
+
+export function deleteSession(sessionId: string): void {
+    sessions.delete(sessionId);
+}

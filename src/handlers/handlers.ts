@@ -5,7 +5,8 @@ import { sendJson } from "../http/send-json.js"
 import { parseCookies } from "../http/parse-cookies.js"
 import { 
     createSession,
-    getSession
+    getSession,
+    deleteSession,
 } from "../sessions/session-store.js"
 
 export const handleHome: RouteHandler = async (req, res, params, url) => {
@@ -135,4 +136,19 @@ export const handleLogin: RouteHandler = async (req, res, params, url) => {
         `session=${sessionId}; Path=/; HttpOnly; SameSite=Lax`
     );
     sendJson(res, { message: "Logged in" });
+}
+
+export const handleLogout: RouteHandler = async (req, res, params, url) => {
+    const cookies = parseCookies(req.headers.cookie);
+    const sessionId = cookies.session;
+
+    if (sessionId !== undefined) {
+        deleteSession(sessionId);
+    }
+
+    res.setHeader(
+        "Set-Cookie", 
+        `session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`
+    );
+    sendJson(res, { message: "Logged out" });
 }

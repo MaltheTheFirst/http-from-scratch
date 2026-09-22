@@ -8,7 +8,8 @@ import {
     handleUser,
     handleUserPost,
     handleEcho,
-    handleLogin
+    handleLogin,
+    handleLogout,
 } from "./handlers/handlers.js"
 
 const routes: Route[] = [
@@ -18,6 +19,7 @@ const routes: Route[] = [
     { method: "GET", pattern: "/", handler: handleHome },
     { method: "POST", pattern: "/echo", handler: handleEcho },
     { method: "POST", pattern: "/login", handler: handleLogin },
+    { method: "POST", pattern: "/logout", handler: handleLogout},
 ];
 
 export function isRecord(
