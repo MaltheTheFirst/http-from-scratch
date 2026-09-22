@@ -2,6 +2,7 @@ import type { Route, RouteHandler } from "../router/router.js";
 import { readBody } from "../http/read-body.js"
 import { isRecord } from "../server.js"
 import { sendJson } from "../http/send-json.js"
+import { parseCookies } from "../http/parse-cookies.js"
 
 export const handleHome: RouteHandler = async (req, res, params, url) => {
     res.end("Home");
@@ -33,6 +34,11 @@ export const handleHello: RouteHandler = async (req, res, params, url) => {
     const data = {
         message
     };
+
+    res.setHeader("Set-Cookie", "username=malthe");
+
+    const cookies = parseCookies(req.headers.cookie);
+    console.log(cookies);
 
     sendJson(res, data);
 }
