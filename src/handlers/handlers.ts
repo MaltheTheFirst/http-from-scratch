@@ -26,14 +26,16 @@ export const handleUserPost: RouteHandler = async (req, res, params, url) => {
 export const handleHello: RouteHandler = async (req, res, params, url) => {
     const name = url.searchParams.get("name");
     const cookies = parseCookies(req.headers.cookie);
-    const cookieName = cookies.username;
+    const sessionId = cookies.session;
+    const session = getSession(sessionId);
+
     let message: string;
 
     if (name !== null && name.length >= 1) {
         message = `Hello ${name}!`;
     }
-    else if (cookieName !== undefined && cookieName.length >= 1) {
-        message = `Hello ${cookieName}!`;
+    else if (session !== undefined) {
+        message = `Hello ${session.username}!`;
     } else {
         message = "Hello, World!";
     }
@@ -41,11 +43,6 @@ export const handleHello: RouteHandler = async (req, res, params, url) => {
     const data = {
         message
     };
-
-    res.setHeader(
-        "Set-Cookie", 
-        "username=malthe; Path=/hello; HttpOnly; SameSite=Lax"
-    );
 
     sendJson(res, data);
 }
