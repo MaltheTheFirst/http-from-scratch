@@ -1,6 +1,6 @@
 export function parseCookies(
     cookieHeader: string | undefined,
-): Record<string, string> {
+): Record<string, string | undefined> {
     if (cookieHeader === undefined) {
         return {};
     }

@@ -27,7 +27,11 @@ export const handleHello: RouteHandler = async (req, res, params, url) => {
     const name = url.searchParams.get("name");
     const cookies = parseCookies(req.headers.cookie);
     const sessionId = cookies.session;
-    const session = getSession(sessionId);
+    let session;
+
+    if (sessionId !== undefined) {
+        session = getSession(sessionId);
+    }
 
     let message: string;
 
