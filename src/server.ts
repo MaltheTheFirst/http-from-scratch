@@ -7,7 +7,8 @@ import {
     handleHello,
     handleUser,
     handleUserPost,
-    handleEcho
+    handleEcho,
+    handleLogin
 } from "./handlers/handlers.js"
 
 const routes: Route[] = [
@@ -16,6 +17,7 @@ const routes: Route[] = [
     { method: "GET", pattern: "/hello", handler: handleHello },
     { method: "GET", pattern: "/", handler: handleHome },
     { method: "POST", pattern: "/echo", handler: handleEcho },
+    { method: "POST", pattern: "/login", handler: handleLogin },
 ];
 
 export function isRecord(
