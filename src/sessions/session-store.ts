@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-type Session = {
+export type Session = {
     username: string;
 };
 

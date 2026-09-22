@@ -11,6 +11,7 @@ import {
     handleLogin,
     handleLogout,
 } from "./handlers/handlers.js"
+import type { RequestContext } from "./http/request-context.js"
 
 const routes: Route[] = [
     { method: "GET", pattern: "/users/:userId", handler: handleUser },
@@ -33,8 +34,11 @@ export function isRecord(
 }
 
 const server = http.createServer((req, res) => {
-    runMiddleware(req, res, async (req, res) => {
-        await handleRequest(req, res, routes);
+    const context: RequestContext = {
+        session: undefined
+    }
+    runMiddleware(req, res, context, async (req, res, context) => {
+        await handleRequest(req, res, context, routes);
     }).catch((error) => {
         console.error("Unhandled request error:", error);
 

@@ -24,23 +24,16 @@ export const handleUserPost: RouteHandler = async (req, res, params, url) => {
     res.end(`User ID: ${userId}, Post ID: ${postId}`);
 }
 
-export const handleHello: RouteHandler = async (req, res, params, url) => {
+export const handleHello: RouteHandler = async (req, res, params, url, context) => {
     const name = url.searchParams.get("name");
-    const cookies = parseCookies(req.headers.cookie);
-    const sessionId = cookies.session;
-    let session;
-
-    if (sessionId !== undefined) {
-        session = getSession(sessionId);
-    }
 
     let message: string;
 
     if (name !== null && name.length >= 1) {
         message = `Hello ${name}!`;
     }
-    else if (session !== undefined) {
-        message = `Hello ${session.username}!`;
+    else if (context.session !== undefined) {
+        message = `Hello ${context.session.username}!`;
     } else {
         message = "Hello, World!";
     }
