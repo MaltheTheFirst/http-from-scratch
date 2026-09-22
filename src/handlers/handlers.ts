@@ -1,6 +1,7 @@
 import type { Route, RouteHandler } from "../router/router.js";
 import { readBody } from "../http/read-body.js"
 import { isRecord } from "../server.js"
+import { sendJson } from "../http/send-json.js"
 
 export const handleHome: RouteHandler = async (req, res, params, url) => {
     res.end("Home");
@@ -19,12 +20,21 @@ export const handleUserPost: RouteHandler = async (req, res, params, url) => {
 
 export const handleHello: RouteHandler = async (req, res, params, url) => {
     const name = url.searchParams.get("name");
+    let message: string;
+
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
     if (name !== null && name.length >= 1) {
-        res.end(`Hello ${name}!`);
+        message = `Hello ${name}!`;
     }
     else {
-        res.end("Hello, World!");
+        message = "Hello, World!";
     }
+
+    const data = {
+        message
+    };
+
+    sendJson(res, data);
 }
 
 export const handleEcho: RouteHandler = async (req, res, params, url) => {
