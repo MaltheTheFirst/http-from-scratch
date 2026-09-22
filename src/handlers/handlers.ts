@@ -21,13 +21,16 @@ export const handleUserPost: RouteHandler = async (req, res, params, url) => {
 
 export const handleHello: RouteHandler = async (req, res, params, url) => {
     const name = url.searchParams.get("name");
+    const cookies = parseCookies(req.headers.cookie);
+    const cookieName = cookies.username;
     let message: string;
 
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
     if (name !== null && name.length >= 1) {
         message = `Hello ${name}!`;
     }
-    else {
+    else if (cookieName !== undefined && cookieName.length >= 1) {
+        message = `Hello ${cookieName}!`;
+    } else {
         message = "Hello, World!";
     }
 
@@ -35,10 +38,10 @@ export const handleHello: RouteHandler = async (req, res, params, url) => {
         message
     };
 
-    res.setHeader("Set-Cookie", "username=malthe");
-
-    const cookies = parseCookies(req.headers.cookie);
-    console.log(cookies);
+    res.setHeader(
+        "Set-Cookie", 
+        "username=malthe; Path=/hello; HttpOnly; SameSite=Lax"
+    );
 
     sendJson(res, data);
 }
