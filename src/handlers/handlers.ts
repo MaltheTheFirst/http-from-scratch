@@ -1,4 +1,8 @@
-import type { Route, RouteHandler } from "../router/router.js";
+import type { 
+    Route, 
+    RouteHandler,
+    AuthenticatedRouteHandler,
+} from "../router/router.js";
 import { readBody } from "../http/read-body.js"
 import { isRecord } from "../server.js"
 import { sendJson } from "../http/send-json.js"
@@ -146,12 +150,7 @@ export const handleLogout: RouteHandler = async (req, res, params, url) => {
     sendJson(res, { message: "Logged out" });
 }
 
-export const handleProfile: RouteHandler = async (req, res, params, url, context) => {
-    if (context.session === undefined) {
-        res.statusCode = 401;
-        sendJson(res,{ error: "Unauthorized"});
-        return;
-    }
+export const handleProfile: AuthenticatedRouteHandler = async (req, res, params, url, context) => {
 
     const username = context.session.username;
     sendJson(res, { username });

@@ -1,5 +1,6 @@
 import http from "node:http";
 import type { RequestContext } from "../http/request-context.js"
+import type { AuthenticatedRequestContext } from "../http/request-context.js"
 
 function matchRoute (pattern: string, pathname: string) {
     const patternParts = pattern.split("/");
@@ -36,6 +37,14 @@ export type RouteHandler = (
     params: Record<string, string>,
     url: URL,
     context: RequestContext,
+) => void | Promise<void>;
+
+export type AuthenticatedRouteHandler = (
+    req: http.IncomingMessage,
+    res: http.ServerResponse,
+    params: Record<string, string>,
+    url: URL,
+    context: AuthenticatedRequestContext
 ) => void | Promise<void>;
 
 export type Route = {
