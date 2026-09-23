@@ -10,6 +10,7 @@ import {
     handleEcho,
     handleLogin,
     handleLogout,
+    handleProfile,
 } from "./handlers/handlers.js"
 import type { RequestContext } from "./http/request-context.js"
 
@@ -21,6 +22,7 @@ const routes: Route[] = [
     { method: "POST", pattern: "/echo", handler: handleEcho },
     { method: "POST", pattern: "/login", handler: handleLogin },
     { method: "POST", pattern: "/logout", handler: handleLogout},
+    { method: "GET", pattern: "/profile", handler: handleProfile},
 ];
 
 export function isRecord(

@@ -145,3 +145,14 @@ export const handleLogout: RouteHandler = async (req, res, params, url) => {
     );
     sendJson(res, { message: "Logged out" });
 }
+
+export const handleProfile: RouteHandler = async (req, res, params, url, context) => {
+    if (context.session === undefined) {
+        res.statusCode = 401;
+        sendJson(res,{ error: "Unauthorized"});
+        return;
+    }
+
+    const username = context.session.username;
+    sendJson(res, { username });
+}
