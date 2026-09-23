@@ -12,16 +12,11 @@ import {
     getSession,
     deleteSession,
 } from "../sessions/session-store.js"
+import { db } from "../db/database.js"
 
 export const handleHome: RouteHandler = async (req, res, params, url) => {
     res.end("Home");
 }
-
-const users = [
-    { id: 1, username: "alice" },
-    { id: 2, username: "bob" },
-    { id: 3, username: "charlie"},
-];
 
 export const handleUser: RouteHandler = async (req, res, params, url) => {
     const userId = Number(params.userId);
@@ -32,9 +27,15 @@ export const handleUser: RouteHandler = async (req, res, params, url) => {
         return;
     }
 
-    const foundUser = users.find(
-        (user) => user.id === userId
+    const result = await db.query(`
+        SELECT id, username
+        FROM users
+        WHERE id = $1;
+    `,
+        [userId]
     );
+
+    const foundUser = result.rows[0];
 
     if (foundUser === undefined) {
         res.statusCode = 404;
