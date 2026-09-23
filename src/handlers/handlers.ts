@@ -17,9 +17,38 @@ export const handleHome: RouteHandler = async (req, res, params, url) => {
     res.end("Home");
 }
 
+const users = [
+    { id: 1, username: "alice" },
+    { id: 2, username: "bob" },
+    { id: 3, username: "charlie"},
+];
+
 export const handleUser: RouteHandler = async (req, res, params, url) => {
-    const userId = params.userId;
-    res.end(`User ID: ${userId}`);
+    const userId = Number(params.userId);
+
+    if(Number.isNaN(userId)) {
+        res.statusCode = 400;
+        sendJson(res, { error: "Invalid user ID" });
+        return;
+    }
+
+    let foundUser;
+
+    for (let i = 0; i < users.length; i++) {
+        const user = users[i];
+
+        if(user.id === userId) {
+            foundUser = user;
+            break;
+        }
+    }
+    if (foundUser === undefined) {
+        res.statusCode = 404;
+        sendJson(res, { error: "User not found" });
+        return;
+    }
+
+    sendJson(res, foundUser);
 }
 
 export const handleUserPost: RouteHandler = async (req, res, params, url) => {
