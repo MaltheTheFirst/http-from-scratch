@@ -11,6 +11,7 @@ import {
     handleLogin,
     handleLogout,
     handleProfile,
+    handleCreateUser,
 } from "./handlers/handlers.js"
 import type { RequestContext } from "./http/request-context.js"
 import { requireAuth } from "./middleware/require-auth.js"
@@ -23,7 +24,8 @@ const routes: Route[] = [
     { method: "POST", pattern: "/echo", handler: handleEcho },
     { method: "POST", pattern: "/login", handler: handleLogin },
     { method: "POST", pattern: "/logout", handler: handleLogout},
-    { method: "GET", pattern: "/profile", handler: requireAuth(handleProfile)},
+    { method: "GET", pattern: "/profile", handler: requireAuth(handleProfile) },
+    { method: "POST", pattern: "/users", handler: handleCreateUser },
 ];
 
 export function isRecord(

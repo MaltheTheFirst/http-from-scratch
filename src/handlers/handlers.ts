@@ -179,3 +179,76 @@ export const handleProfile: AuthenticatedRouteHandler = async (req, res, params,
     const username = context.session.username;
     sendJson(res, { username });
 }
+
+export const handleCreateUser: RouteHandler = async (req, res, params, url, context) => {
+    const contentType = req.headers["content-type"];
+
+    if (contentType === undefined) {
+        res.statusCode = 415;
+        res.end("Missing content type");
+        return;
+    }
+    const parts = contentType.split(";");
+    const mediaType = parts[0];
+
+    if (mediaType !== "application/json") {
+        res.statusCode = 415;
+        res.end("Unsupported media type");
+        return;
+    } 
+    let body: string;
+    let username: string;
+
+    try {
+        body = await readBody(req);
+    } catch {
+        res.statusCode = 400;
+        res.end("Failed to read request body");
+        return;
+    }
+
+    try {
+        const parsedBody: unknown = JSON.parse(body);
+
+        if (!isRecord(parsedBody)) {
+            res.statusCode = 400;
+            res.end("Invalid request body: expected an object");
+            return;
+        }
+
+        if (!Object.hasOwn(parsedBody, "username")) {
+            res.statusCode = 400;
+            res.end("Invalid request body: 'username' property is required");
+            return;
+        }
+        if (typeof parsedBody.username !== "string") {
+            res.statusCode = 400;
+            res.end("Invalid request body: 'username' must be a string");
+            return;
+        }
+
+        if (parsedBody.username.length === 0) {
+            res.statusCode = 400;
+            sendJson(res, { error: "Invalid request body: 'username' must not be empty" });
+            return;
+        }
+
+        username = parsedBody.username;
+    } catch {
+        res.statusCode = 400;
+        res.end("Invalid JSON");
+        return;
+    }
+
+    const result = await db.query(`
+        INSERT INTO users (username)
+        VALUES ($1)
+        RETURNING id, username;
+    `,
+        [username]
+    );
+
+    const createdUser = result.rows[0];
+    res.statusCode = 201;
+    sendJson(res, createdUser);
+};
