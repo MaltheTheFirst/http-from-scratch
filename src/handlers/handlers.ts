@@ -32,16 +32,10 @@ export const handleUser: RouteHandler = async (req, res, params, url) => {
         return;
     }
 
-    let foundUser;
+    const foundUser = users.find(
+        (user) => user.id === userId
+    );
 
-    for (let i = 0; i < users.length; i++) {
-        const user = users[i];
-
-        if(user.id === userId) {
-            foundUser = user;
-            break;
-        }
-    }
     if (foundUser === undefined) {
         res.statusCode = 404;
         sendJson(res, { error: "User not found" });
