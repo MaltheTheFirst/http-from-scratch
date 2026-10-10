@@ -6,6 +6,7 @@ import type {
 import { readBody } from "../http/read-body.js"
 import { isRecord } from "../server.js"
 import { sendJson } from "../http/send-json.js"
+import { readJsonBody } from "../http/read-json-body.js"
 import { parseCookies } from "../http/parse-cookies.js"
 import { 
     createSession,
@@ -74,56 +75,34 @@ export const handleHello: RouteHandler = async (req, res, params, url, context) 
 }
 
 export const handleEcho: RouteHandler = async (req, res, params, url) => {
-    // Validate the representation before consuming the request body.
-    const contentType = req.headers["content-type"];
+    // Read and parse the JSON request body.
+    const result = await readJsonBody(req);
 
-    if (contentType === undefined) {
-        res.statusCode = 415;
-        res.end("Missing content type");
+    if (!result.ok) {
+        res.statusCode = result.statusCode;
+        sendJson(res, { error: result.error });
         return;
     }
-    const parts = contentType.split(";");
-    const mediaType = parts[0];
 
-    if (mediaType !== "application/json") {
-        res.statusCode = 415;
-        res.end("Unsupported media type");
-        return;
-    } 
-    let body: string;
+    const parsedBody = result.data;
 
-    try {
-        body = await readBody(req);
-    } catch {
+    if (!isRecord(parsedBody)) {
         res.statusCode = 400;
-        res.end("Failed to read request body");
+        res.end("Invalid request body: expected an object");
         return;
     }
 
-    try {
-        const parsedBody: unknown = JSON.parse(body);
-
-        if (!isRecord(parsedBody)) {
-            res.statusCode = 400;
-            res.end("Invalid request body: expected an object");
-            return;
-        }
-
-        if (!Object.hasOwn(parsedBody, "message")) {
-            res.statusCode = 400;
-            res.end("Invalid request body: 'message' property is required");
-            return;
-        }
-        if (typeof parsedBody.message !== "string") {
-            res.statusCode = 400;
-            res.end("Invalid request body: 'message' must be a string");
-            return;
-        }
-        res.end(parsedBody.message);
-    } catch {
+    if (!Object.hasOwn(parsedBody, "message")) {
         res.statusCode = 400;
-        res.end("Invalid JSON");
+        res.end("Invalid request body: 'message' property is required");
+        return;
     }
+    if (typeof parsedBody.message !== "string") {
+        res.statusCode = 400;
+        res.end("Invalid request body: 'message' must be a string");
+        return;
+    }
+    res.end(parsedBody.message);
 }
 
 export const handleLogin: RouteHandler = async (req, res, params, url) => {
@@ -181,66 +160,42 @@ export const handleProfile: AuthenticatedRouteHandler = async (req, res, params,
 }
 
 export const handleCreateUser: RouteHandler = async (req, res, params, url, context) => {
-    const contentType = req.headers["content-type"];
+    const result = await readJsonBody(req);
 
-    if (contentType === undefined) {
-        res.statusCode = 415;
-        res.end("Missing content type");
+    if (!result.ok) {
+        res.statusCode = result.statusCode;
+        sendJson(res, { error: result.error });
         return;
     }
-    const parts = contentType.split(";");
-    const mediaType = parts[0];
 
-    if (mediaType !== "application/json") {
-        res.statusCode = 415;
-        res.end("Unsupported media type");
-        return;
-    } 
-    let body: string;
-    let username: string;
+    const parsedBody = result.data;
 
-    try {
-        body = await readBody(req);
-    } catch {
+    if (!isRecord(parsedBody)) {
         res.statusCode = 400;
-        res.end("Failed to read request body");
+        res.end("Invalid request body: expected an object");
         return;
     }
 
-    try {
-        const parsedBody: unknown = JSON.parse(body);
-
-        if (!isRecord(parsedBody)) {
-            res.statusCode = 400;
-            res.end("Invalid request body: expected an object");
-            return;
-        }
-
-        if (!Object.hasOwn(parsedBody, "username")) {
-            res.statusCode = 400;
-            res.end("Invalid request body: 'username' property is required");
-            return;
-        }
-        if (typeof parsedBody.username !== "string") {
-            res.statusCode = 400;
-            res.end("Invalid request body: 'username' must be a string");
-            return;
-        }
-
-        if (parsedBody.username.length === 0) {
-            res.statusCode = 400;
-            sendJson(res, { error: "Invalid request body: 'username' must not be empty" });
-            return;
-        }
-
-        username = parsedBody.username;
-    } catch {
+    if (!Object.hasOwn(parsedBody, "username")) {
         res.statusCode = 400;
-        res.end("Invalid JSON");
+        res.end("Invalid request body: 'username' property is required");
+        return;
+    }
+    if (typeof parsedBody.username !== "string") {
+        res.statusCode = 400;
+        res.end("Invalid request body: 'username' must be a string");
         return;
     }
 
-    const result = await db.query(`
+    if (parsedBody.username.length === 0) {
+        res.statusCode = 400;
+        sendJson(res, { error: "Invalid request body: 'username' must not be empty" });
+        return;
+    }
+
+    const username = parsedBody.username;
+
+    const dbResult = await db.query(`
         INSERT INTO users (username)
         VALUES ($1)
         RETURNING id, username;
@@ -248,7 +203,7 @@ export const handleCreateUser: RouteHandler = async (req, res, params, url, cont
         [username]
     );
 
-    const createdUser = result.rows[0];
+    const createdUser = dbResult.rows[0];
     res.statusCode = 201;
     sendJson(res, createdUser);
 };
