@@ -195,7 +195,8 @@ export const handleCreateUser: RouteHandler = async (req, res, params, url, cont
 
     const username = parsedBody.username;
 
-    const dbResult = await db.query(`
+    try {
+        const dbResult = await db.query(`
         INSERT INTO users (username)
         VALUES ($1)
         RETURNING id, username;
@@ -203,7 +204,16 @@ export const handleCreateUser: RouteHandler = async (req, res, params, url, cont
         [username]
     );
 
-    const createdUser = dbResult.rows[0];
-    res.statusCode = 201;
-    sendJson(res, createdUser);
+        const createdUser = dbResult.rows[0];
+        res.statusCode = 201;
+        sendJson(res, createdUser);
+    } catch (error) {
+        if (isRecord(error) && error.code === "23505" && error.constraint === "users_username_key") {
+            res.statusCode = 409;
+            sendJson(res, { error: "Username already exists" });
+            return;
+        }
+        res.statusCode = 500;
+        sendJson(res, { error: "Internal server error" });
+    }
 };
