@@ -13,6 +13,7 @@ import {
     handleProfile,
     handleCreateUser,
     handleIndex,
+    handleAppJs,
 } from "./handlers/handlers.js"
 import type { RequestContext } from "./http/request-context.js"
 import { requireAuth } from "./middleware/require-auth.js"
@@ -27,6 +28,7 @@ const routes: Route[] = [
     { method: "GET", pattern: "/profile", handler: requireAuth(handleProfile) },
     { method: "POST", pattern: "/users", handler: handleCreateUser },
     { method: "GET", pattern: "/", handler: handleIndex },
+    { method: "GET", pattern: "/app.js", handler: handleAppJs },
 ];
 
 export function isRecord(

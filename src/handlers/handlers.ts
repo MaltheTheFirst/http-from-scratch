@@ -15,6 +15,7 @@ import {
 } from "../sessions/session-store.js"
 import { db } from "../db/database.js"
 import { readFile } from "node:fs/promises"
+import { serveStaticFile } from "../http/serve-static-file.js"
 
 export const handleHome: RouteHandler = async (req, res, params, url) => {
     res.end("Home");
@@ -220,7 +221,9 @@ export const handleCreateUser: RouteHandler = async (req, res, params, url, cont
 };
 
 export const handleIndex: RouteHandler = async (req, res, params, url, context) => {
-    const html = await readFile("public/index.html", "utf8");
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.end(html);
+    await serveStaticFile(res, "public/index.html", "text/html; charset=utf-8")
+};
+
+export const handleAppJs: RouteHandler = async (req, res, params, url, context) => {
+    await serveStaticFile(res, "public/app.js", "application/javascript; charset=utf-8")
 }
