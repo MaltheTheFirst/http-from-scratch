@@ -6,16 +6,19 @@
 
 <body> 
     <h1>Create User</h1>
-    <input type="text" id="username" placeholder="Enter username">
-    <button id="create-user">Create User</button>
+    <form id="create-user-form">    
+        <input type="text" id="username" placeholder="Enter username">
+        <button type="submit">Create User</button>
+    </form>
     <p id="result"></p>
 
     <script>
         const usernameInput = document.getElementById('username');
-        const createUserButton = document.getElementById('create-user');
+        const createUserForm = document.getElementById('create-user-form');
         const result = document.getElementById('result');
 
-        createUserButton.addEventListener('click', async () => {
+        createUserForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
             const username = usernameInput.value;
 
             const response = await fetch("/users", {
