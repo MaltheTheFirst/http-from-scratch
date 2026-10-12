@@ -10,11 +10,21 @@
         <input type="text" id="username" placeholder="Enter username">
         <button type="submit">Create User</button>
     </form>
+
+    <h1>Find User</h1>
+    <form id="find-user-form">
+        <input type="number" id="user-id" placeholder="Enter user ID">
+        <button type="submit">Find User</button>
+    </form>
     <p id="result"></p>
 
     <script>
         const usernameInput = document.getElementById('username');
         const createUserForm = document.getElementById('create-user-form');
+
+        const userIdInput = document.getElementById('user-id');
+        const findUserForm = document.getElementById('find-user-form');
+
         const result = document.getElementById('result');
 
         createUserForm.addEventListener('submit', async (event) => {
@@ -36,6 +46,20 @@
                 result.textContent = `Error: ${data.error}`;
             }
         })
+
+    findUserForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const userId = userIdInput.value;
+
+        const response = await fetch(`/users/${userId}`);
+
+        const data = await response.json();
+        if (response.ok) {
+            result.textContent = `User found: ID ${data.id}, Username: ${data.username}`;
+        } else {
+            result.textContent = `Error: ${data.error}`;
+        }
+    })
     </script>
 </body>
 </html>
