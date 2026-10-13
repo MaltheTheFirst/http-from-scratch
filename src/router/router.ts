@@ -1,5 +1,5 @@
 import http from "node:http";
-import { tryServeStaticFile } from "../handlers/handlers.js";
+import { tryServeStaticFile } from "../http/try-serve-static-file.js"
 import type { RequestContext } from "../http/request-context.js"
 import type { AuthenticatedRequestContext } from "../http/request-context.js"
 
