@@ -48,6 +48,16 @@ export const handleUser: RouteHandler = async (req, res, params, url) => {
     sendJson(res, foundUser);
 }
 
+export const handleUsers: RouteHandler = async (req, res, params, url) => {
+    const result = await db.query(`
+        SELECT id, username
+        FROM users;
+    `
+    );
+
+    sendJson(res, result.rows);
+};
+
 export const handleUserPost: RouteHandler = async (req, res, params, url) => {
     const userId = params.userId;
     const postId = params.postId;

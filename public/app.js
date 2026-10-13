@@ -4,6 +4,9 @@ const createUserForm = document.getElementById('create-user-form');
 const userIdInput = document.getElementById('user-id');
 const findUserForm = document.getElementById('find-user-form');
 
+const loadUsersButton = document.getElementById('load-users');
+const usersList = document.getElementById('users-list');
+
 const result = document.getElementById('result');
 
 createUserForm.addEventListener('submit', async (event) => {
@@ -39,3 +42,18 @@ findUserForm.addEventListener('submit', async (event) => {
         result.textContent = `Error: ${data.error}`;
     }
 })
+
+loadUsersButton.addEventListener('click', async () => {
+    const response = await fetch("/users");
+    const users = await response.json();
+
+    usersList.innerHTML = '';
+
+    for (let i = 0; i < users.length; i++) {
+        const user = users[i];
+
+        const li = document.createElement('li');
+        li.textContent = `ID: ${user.id}, Username: ${user.username}`;
+        usersList.appendChild(li);
+    }
+});

@@ -7,13 +7,13 @@ import {
     handleHello,
     handleUser,
     handleUserPost,
+    handleUsers,
     handleEcho,
     handleLogin,
     handleLogout,
     handleProfile,
     handleCreateUser,
     handleIndex,
-    handleAppJs,
 } from "./handlers/handlers.js"
 import type { RequestContext } from "./http/request-context.js"
 import { requireAuth } from "./middleware/require-auth.js"
@@ -21,6 +21,7 @@ import { requireAuth } from "./middleware/require-auth.js"
 const routes: Route[] = [
     { method: "GET", pattern: "/users/:userId", handler: handleUser },
     { method: "GET", pattern: "/users/:userId/posts/:postId", handler: handleUserPost },
+    { method: "GET", pattern: "/users", handler: handleUsers },
     { method: "GET", pattern: "/hello", handler: handleHello },
     { method: "POST", pattern: "/echo", handler: handleEcho },
     { method: "POST", pattern: "/login", handler: handleLogin },
