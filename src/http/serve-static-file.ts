@@ -4,9 +4,14 @@ import { readFile } from "node:fs/promises"
 export async function serveStaticFile(
     res: http.ServerResponse, 
     filePath: string, 
-    contentType: string
+    contentType: string,
+    sendBody: boolean = true
 ): Promise<void> {
     const content = await readFile(filePath, "utf8");
     res.setHeader("Content-Type", contentType);
-    res.end(content);
+    if (sendBody) {
+        res.end(content);
+    } else {
+        res.end();
+    }
 }

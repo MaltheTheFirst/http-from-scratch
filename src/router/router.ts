@@ -1,4 +1,5 @@
 import http from "node:http";
+import { tryServeStaticFile } from "../handlers/handlers.js";
 import type { RequestContext } from "../http/request-context.js"
 import type { AuthenticatedRequestContext } from "../http/request-context.js"
 
@@ -74,7 +75,7 @@ export async function handleRequest(
         if (route.method === "GET") {
             allowedMethods.push("GET", "HEAD");
         } else {
-        allowedMethods.push(route.method);
+            allowedMethods.push(route.method);
         }
 
         if (req.method !== route.method &&
@@ -104,6 +105,13 @@ export async function handleRequest(
     }
 
     if (allowedMethods.length === 0) {
+        if (req.method === "GET" || req.method === "HEAD") {
+            const handled = await tryServeStaticFile(res, url, req.method);
+
+            if (handled) {
+                return;
+            }
+        }
     // No method/path combination above matched the request.
     res.statusCode = 404;
     res.end("Not Found");
