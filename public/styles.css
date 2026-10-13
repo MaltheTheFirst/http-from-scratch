@@ -1,0 +1,45 @@
+body {
+    font-family: sans-serif;
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+form {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+input {
+    flex: 1;
+    padding: 0.75rem;
+}
+
+button {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+}
+
+#result {
+    margin: 1rem 0;
+    min-height: 1.5rem;
+}
+
+#users-list {
+    padding-left: 1.25rem;
+}
+
+#users-list li {
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 600px) {
+    form {
+        flex-direction: column;
+    }
+
+    button {
+        width: 100%;
+    }
+}
