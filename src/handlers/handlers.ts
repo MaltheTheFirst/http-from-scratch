@@ -357,3 +357,75 @@ export const handleCreateUserWithNote: RouteHandler = async (req, res, params, u
         client.release();
     }
 }
+
+export const handleUpdateUser: RouteHandler = async (req, res, params, url, context) => {
+    const userId = Number(params.userId);
+
+    if(Number.isNaN(userId)) {
+        res.statusCode = 400;
+        sendJson(res, { error: "Invalid user ID" });
+        return;
+    }
+
+    const bodyResult = await readJsonBody(req);
+
+    if (!bodyResult.ok) {
+        res.statusCode = bodyResult.statusCode;
+        sendJson(res, { error: bodyResult.error });
+        return;
+    }
+
+    const parsedBody = bodyResult.data;
+
+    if (!isRecord(parsedBody)) {
+        res.statusCode = 400;
+        sendJson(res, { error: "Invalid request body: expected an object" });
+        return;
+    }
+
+    if (
+        !Object.hasOwn(parsedBody, "username") || 
+        typeof parsedBody.username !== "string" || 
+        parsedBody.username.trim().length === 0) 
+    {
+        res.statusCode = 400;
+        sendJson(res, { error: "Invalid username" });
+        return;
+    }
+
+    try {
+        const dbResult = await db.query(`
+        UPDATE users
+        SET username = $1
+        WHERE id = $2
+        RETURNING id, username;
+    `,
+        [
+            parsedBody.username,
+            userId
+        ]
+    );
+
+        const updatedUser = dbResult.rows[0];
+
+        if (updatedUser === undefined) {
+            res.statusCode = 404;
+            sendJson(res, { error: "User not found" });
+            return;
+        }
+
+        res.statusCode = 200;
+        sendJson(res, updatedUser);
+    } catch (error) {
+        if (
+            isRecord(error) && 
+            error.code === "23505" && 
+            error.constraint === "users_username_normalised_key"
+        ) {
+            res.statusCode = 409;
+            sendJson(res, { error: "Username already exists" });
+            return;
+        }
+        throw error;
+    }
+}

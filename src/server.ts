@@ -17,6 +17,7 @@ import {
     handleIndex,
     handleNotes,
     handleCreateUserWithNote,
+    handleUpdateUser,
 } from "./handlers/handlers.js"
 import type { RequestContext } from "./http/request-context.js"
 import { requireAuth } from "./middleware/require-auth.js"
@@ -35,6 +36,7 @@ const routes: Route[] = [
     { method: "GET", pattern: "/", handler: handleIndex },
     { method: "GET", pattern: "/notes", handler: handleNotes },
     { method: "POST", pattern: "/users-with-note", handler: handleCreateUserWithNote},
+    { method: "PATCH", pattern: "/users/:userId", handler: handleUpdateUser},
 ];
 
 export function isRecord(
