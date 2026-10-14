@@ -248,7 +248,7 @@ export const handleCreateUser: RouteHandler = async (req, res, params, url, cont
         res.statusCode = 201;
         sendJson(res, createdUser);
     } catch (error) {
-        if (isRecord(error) && error.code === "23505" && error.constraint === "users_username_key") {
+        if (isRecord(error) && error.code === "23505" && error.constraint === "users_username_normalised_key") {
             res.statusCode = 409;
             sendJson(res, { error: "Username already exists" });
             return;
