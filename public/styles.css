@@ -43,6 +43,19 @@ button {
     width: auto;
 }
 
+#notes-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+#notes-list button {
+    padding: 0.4rem 0.7rem;
+    width: auto;
+}
+
 @media (max-width: 600px) {
     form {
         flex-direction: column;

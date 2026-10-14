@@ -265,3 +265,17 @@ export const handleIndex: RouteHandler = async (req, res, params, url, context) 
 export const handleAppJs: RouteHandler = async (req, res, params, url, context) => {
     await serveStaticFile(res, "public/app.js", "application/javascript; charset=utf-8")
 }
+
+export const handleNotes: RouteHandler = async (req, res, params, url, context) => {
+    const result = await db.query(`
+        SELECT
+            notes.id,
+            users.username,
+            notes.content
+        FROM notes
+        JOIN users
+            ON notes.user_id = users.id;
+    `);
+
+    sendJson(res, result.rows)
+}
