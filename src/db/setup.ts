@@ -16,7 +16,8 @@ await db.query(`
     user_id INTEGER NOT NULL 
         REFERENCES users(id)
         ON DELETE CASCADE,
-    content TEXT NOT NULL);
+    content TEXT NOT NULL,
+    UNIQUE (user_id, content));
 `)
 
 await db.query(`
