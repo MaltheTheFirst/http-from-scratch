@@ -279,3 +279,81 @@ export const handleNotes: RouteHandler = async (req, res, params, url, context) 
 
     sendJson(res, result.rows)
 }
+
+export const handleCreateUserWithNote: RouteHandler = async (req, res, params, url, context) => {
+    const bodyResult = await readJsonBody(req);
+
+    if (!bodyResult.ok) {
+        res.statusCode = bodyResult.statusCode;
+        sendJson(res, { error: bodyResult.error });
+        return;
+    }
+
+    const parsedBody = bodyResult.data;
+
+    if (!isRecord(parsedBody)) {
+        res.statusCode = 400;
+        sendJson(res, { error: "Invalid request body: expected an object" });
+        return;
+    }
+
+    if (
+        !Object.hasOwn(parsedBody, "username") || 
+        typeof parsedBody.username !== "string" || 
+        parsedBody.username.trim().length === 0) 
+    {
+        res.statusCode = 400;
+        sendJson(res, { error: "Invalid username" });
+        return;
+    }
+
+    if (
+        !Object.hasOwn(parsedBody, "note") || 
+        typeof parsedBody.note !== "string" || 
+        parsedBody.note.trim().length === 0) 
+    {
+        res.statusCode = 400;
+        sendJson(res, { error: "Invalid note" });
+        return;
+    }
+
+    const client = await db.connect();
+
+    try {
+        await client.query("BEGIN");
+
+        const userResult = await client.query(
+            `
+                INSERT INTO users (username)
+                VALUES ($1)
+                RETURNING id, username;    
+            `,
+            [parsedBody.username]
+        );
+
+        const noteResult = await client.query(
+            `
+                INSERT INTO notes (user_id, content)
+                VALUES ($1, $2)
+                RETURNING id, user_id, content;
+            `,
+            [
+                userResult.rows[0].id,
+                parsedBody.note
+            ]
+        );
+
+        await client.query("COMMIT");
+
+        res.statusCode = 201;
+        sendJson(res, { 
+            user: userResult.rows[0],
+            note: noteResult.rows[0]
+         });
+    } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    } finally {
+        client.release();
+    }
+}
