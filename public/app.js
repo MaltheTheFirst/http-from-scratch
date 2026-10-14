@@ -49,37 +49,65 @@ loadUsersButton.addEventListener('click', async () => {
 });
 
 async function loadUsers() {
-    const response = await fetch("/users");
-    const users = await response.json();
-
     usersList.innerHTML = '';
+    const loadingItem = document.createElement('li');
+    loadingItem.textContent = 'Loading...';
+    usersList.appendChild(loadingItem);
 
-    for (let i = 0; i < users.length; i++) {
-        const user = users[i];
+    try {
+        const response = await fetch("/users");
 
-        const li = document.createElement('li');
-        li.textContent = `ID: ${user.id}, Username: ${user.username}`;
+        if (!response.ok) {
+            usersList.innerHTML = '';
+            const li = document.createElement('li');
+            li.textContent = `Error: ${response.status} ${response.statusText}`;
+            usersList.appendChild(li);
+            return;
+        }
+    
+        const users = await response.json();
+    
+        usersList.innerHTML = '';
 
-        const deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Delete';
+        if (users.length === 0) {
+            const li = document.createElement('li');
+            li.textContent = 'No users found';
+            usersList.appendChild(li);
+            return;
+        }
 
-        deleteButton.addEventListener('click', async () => {
-            const response = await fetch(`/users/${user.id}`, {
-                method: "DELETE"
+        for (let i = 0; i < users.length; i++) {
+            const user = users[i];
+
+            const li = document.createElement('li');
+            li.textContent = `ID: ${user.id}, Username: ${user.username}`;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+
+            deleteButton.addEventListener('click', async () => {
+                const response = await fetch(`/users/${user.id}`, {
+                    method: "DELETE"
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    result.textContent = `User deleted: ID ${data.id}, Username: ${data.username}`;
+                    await loadUsers();
+                } else {
+                    result.textContent = `Error: ${data.error}`;
+                }
             });
 
-            const data = await response.json();
+            li.appendChild(deleteButton);
 
-            if (response.ok) {
-                result.textContent = `User deleted: ID ${data.id}, Username: ${data.username}`;
-                await loadUsers();
-            } else {
-                result.textContent = `Error: ${data.error}`;
-            }
-        });
-
-        li.appendChild(deleteButton);
-
+            usersList.appendChild(li);
+        }    
+    } catch  (error) {
+        usersList.innerHTML = '';
+        const li = document.createElement('li');
+        li.textContent = `Error: ${error.message}`;
         usersList.appendChild(li);
     }
 }
