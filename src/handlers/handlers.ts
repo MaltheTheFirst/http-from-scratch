@@ -58,6 +58,35 @@ export const handleUsers: RouteHandler = async (req, res, params, url) => {
     sendJson(res, result.rows);
 };
 
+export const handleDeleteUser: RouteHandler = async (req, res, params, url) => {
+    const userId = Number(params.userId);
+
+    if(Number.isNaN(userId)) {
+        res.statusCode = 400;
+        sendJson(res, { error: "Invalid user ID" });
+        return;
+    }
+
+    const result = await db.query(`
+        DELETE
+        FROM users
+        WHERE id = $1
+        RETURNING id, username;
+    `,
+        [userId]
+    );
+
+    const deletedUser = result.rows[0];
+
+    if (deletedUser === undefined) {
+        res.statusCode = 404;
+        sendJson(res, { error: "User not found" });
+        return;
+    }
+
+    sendJson(res, deletedUser);
+}
+
 export const handleUserPost: RouteHandler = async (req, res, params, url) => {
     const userId = params.userId;
     const postId = params.postId;

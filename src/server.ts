@@ -8,6 +8,7 @@ import {
     handleUser,
     handleUserPost,
     handleUsers,
+    handleDeleteUser,
     handleEcho,
     handleLogin,
     handleLogout,
@@ -20,6 +21,7 @@ import { requireAuth } from "./middleware/require-auth.js"
 
 const routes: Route[] = [
     { method: "GET", pattern: "/users/:userId", handler: handleUser },
+    { method: "DELETE", pattern: "/users/:userId", handler: handleDeleteUser },
     { method: "GET", pattern: "/users/:userId/posts/:postId", handler: handleUserPost },
     { method: "GET", pattern: "/users", handler: handleUsers },
     { method: "GET", pattern: "/hello", handler: handleHello },

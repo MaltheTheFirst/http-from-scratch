@@ -24,7 +24,7 @@ createUserForm.addEventListener('submit', async (event) => {
     const data = await response.json();
     if (response.ok) {
         result.textContent = `User created: ID ${data.id}, Username: ${data.username}`;
-        await loadUsers();
+        await loadUsers();  
     } else {
         result.textContent = `Error: ${data.error}`;
     }
@@ -59,6 +59,27 @@ async function loadUsers() {
 
         const li = document.createElement('li');
         li.textContent = `ID: ${user.id}, Username: ${user.username}`;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+
+        deleteButton.addEventListener('click', async () => {
+            const response = await fetch(`/users/${user.id}`, {
+                method: "DELETE"
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                result.textContent = `User deleted: ID ${data.id}, Username: ${data.username}`;
+                await loadUsers();
+            } else {
+                result.textContent = `Error: ${data.error}`;
+            }
+        });
+
+        li.appendChild(deleteButton);
+
         usersList.appendChild(li);
     }
 }
